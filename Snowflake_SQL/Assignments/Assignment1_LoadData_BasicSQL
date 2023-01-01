@@ -1,0 +1,79 @@
+use database DEMO_DATABASE;
+
+//1. Load the given dataset into snowflake with a primary key to Order Date column.
+
+CREATE OR REPLACE TABLE sa_sales_data
+(order_id varchar(20),
+ order_date varchar(10) PRIMARY KEY, 
+ ship_date varchar(10), 
+ ship_mode varchar(20), 
+ customer_name varchar(30), 
+ segment varchar(20),
+ state varchar(50), 
+ country varchar(50),
+ market varchar(50),
+ region varchar(50), 
+ product_id varchar(30),
+ category varchar(30),
+ sub_category varchar(30),
+ product_name String, 
+ sales number(10,2), 
+ quantity number, 
+ discount float,
+ profit float, 
+ shipping_cost float,
+ order_priority varchar(10),
+ year varchar(4));
+
+DESCRIBE TABLE sa_sales_data;
+
+SELECT * FROM sa_sales_data;
+
+
+//2. Change the Primary key to Order Id Column.
+ALTER TABLE sa_sales_data
+DROP PRIMARY KEY;
+
+ALTER TABLE sa_sales_data
+ADD PRIMARY KEY(ORDER_ID);
+
+
+//3. CHECK THE ORDER DATE AND SHIP DATE TYPE AND THINK IN WHICH DATA TYPE YOU HAVE TO 
+DESCRIBE TABLE sa_sales_data; //To check the data type of Order date and ship date. Here type should be of Date type.
+SELECT to_date(Order_Date, 'yyyy-mm-dd') from sa_sales_data;
+SELECT to_date(Ship_Date, 'yyyy-mm-dd') from sa_sales_data;
+
+//4. Create a new column called order_extract and extract the number after the last ‘–‘from Order ID column..
+
+CREATE OR REPLACE TABLE sa_sales_data as
+SELECT substring(Order_Id, 9) as Order_extract, * from sa_sales_data;
+
+//5.Create a new column called Discount Flag and categorize it based on discount. Use ‘Yes’ if the discount is greater than zero else ‘No’.
+CREATE OR REPLACE TABLE sa_sales_data as
+SELECT *,
+      CASE
+        WHEN DISCOUNT>0 THEN 'YES'
+        ELSE 'NO'
+      END AS DISCOUNT_FLAG
+FROM sa_sales_data;
+      
+
+//6. Create a new column called process days and calculate how many days it takes for each order id to process from the order to its shipment.
+
+CREATE OR REPLACE TABLE sa_sales_data as
+SELECT*,
+DATEDIFF('days',ORDER_DATE,SHIP_DATE) as PROCESS_DAYS
+FROM sa_sales_data;
+
+//7. FLAG THE PROCESS DAY AS BY RATING IF IT TAKES LESS OR EQUAL 3  DAYS MAKE 5,LESS OR EQUAL THAN 6 DAYS BUT MORE THAN 3 MAKE 4,LESS THAN 10 BUT MORE THAN 6 MAKE 3,MORE THAN 10 MAKE IT 2 FOR EVERY ORDER ID
+
+CREATE OR REPLACE TABLE sa_sales_data AS;
+SELECT*, 
+    CASE
+       WHEN PROCESS_DAYS <= 3 THEN 5
+       WHEN PROCESS_DAYS BETWEEN 4 AND 6 THEN 4
+       WHEN PROCESS_DAYS BETWEEN 7 AND 10 THEN 3
+       ELSE 2
+     END AS RATING
+FROM sa_sales_data;
+  
